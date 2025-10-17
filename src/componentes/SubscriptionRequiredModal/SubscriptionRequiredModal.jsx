@@ -1,14 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../Modal/Modal';
-import { useNavigation } from '../../context/NavigationContext';
 import styles from './SubscriptionRequiredModal.module.css';
 
 const SubscriptionRequiredModal = ({ isOpen, onClose }) => {
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate();
 
   const handleGoToPricing = () => {
     onClose();
-    navigateTo('pricing');
+    navigate('/pricing');
   };
 
   return (

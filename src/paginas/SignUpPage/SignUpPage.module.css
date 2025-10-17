@@ -158,3 +158,60 @@
     right: 1.5rem;
   }
 }
+
+/* Botão do Google */
+.googleButton {
+  width: 100%;
+  background-color: white;
+  color: #444;
+  padding: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.googleButton:hover:not(:disabled) {
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.googleButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Divisor "or" */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #8c8c8c;
+  font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #555;
+}
+
+.divider span {
+  padding: 0 1rem;
+}
+
+.errorMessage {
+  color: #ff6b6b;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}

@@ -1,14 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../Modal/Modal';
-import { useNavigation } from '../../context/NavigationContext';
 import styles from './PaymentRequiredModal.module.css';
 
 const PaymentRequiredModal = ({ isOpen, onClose }) => {
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate();
 
   const handleGoToLogin = () => {
     onClose();
-    navigateTo('login');
+    navigate('/login');
   };
 
   return (

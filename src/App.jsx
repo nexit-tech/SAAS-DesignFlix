@@ -16,6 +16,8 @@ import PricingPage from './paginas/PricingPage/PricingPage';
 import ProfilePage from './paginas/ProfilePage/ProfilePage';
 import PaymentPage from './paginas/PaymentPage/PaymentPage';
 import PaymentSuccess from './paginas/PaymentSuccess/PaymentSuccess'; // CORRIGIDO: caminho atualizado
+import ResetPasswordPage from './paginas/ResetPasswordPage/ResetPasswordPage';
+
 
 import './App.css';
 import { useNavigation } from './context/NavigationContext';
@@ -75,6 +77,7 @@ function App() {
           <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
           <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
           <Route path="/payment" element={<PageWrapper><PaymentPage /></PageWrapper>} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           {/* NOVA ROTA: Página de sucesso do pagamento */}
           <Route path="/payment-success" element={<PageWrapper><PaymentSuccess /></PageWrapper>} />
         </Routes>

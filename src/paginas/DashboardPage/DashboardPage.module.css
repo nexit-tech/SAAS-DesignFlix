@@ -54,3 +54,53 @@
 @media (max-width: 1200px) { .searchResultsGrid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 900px) { .searchResultsGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px) { .searchResultsGrid { grid-template-columns: 1fr; } }
+
+/* Adicione no final do arquivo */
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.modalImage {
+  width: 100%;
+  max-width: 400px;
+  height: 450px;
+  object-fit: contain;
+  background-color: #141414;
+  border-radius: 8px;
+  margin: 0 auto 1.5rem;
+  display: block;
+}
+
+.modalContent h3 {
+  font-size: 1.8rem;
+  margin: 0 0 0.25rem;
+}
+
+.modalContent p {
+  font-size: 1rem;
+  color: #b3b3b3;
+  margin: 0 0 1.5rem;
+}
+
+.downloadButton {
+  background-color: var(--cor-primaria);
+  color: white;
+  padding: 0.9rem 2.5rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+}
+
+.downloadButton:hover {
+  background-color: #c40812;
+}
