@@ -6,23 +6,28 @@ import styles from './PaymentSuccess.module.css';
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('checking'); // checking, success, error
+  const [status, setStatus] = useState('checking');
   const [message, setMessage] = useState('Processing your subscription...');
   const planName = searchParams.get('plan');
 
   useEffect(() => {
     let attempts = 0;
-    const maxAttempts = 10; // 10 tentativas = 20 segundos no máximo
+    const maxAttempts = 15; // Aumentado para 30 segundos
 
     const checkSubscriptionStatus = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        console.log('🔍 Checking subscription status... Attempt:', attempts + 1);
         
-        if (!user) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error('❌ User error:', userError);
           setStatus('error');
           setMessage('User not found. Please login again.');
           return;
         }
+
+        console.log('✅ User found:', user.id);
 
         // Verificar o status da assinatura
         const { data: profile, error } = await supabase
@@ -32,13 +37,16 @@ const PaymentSuccess = () => {
           .single();
 
         if (error) {
-          console.error('Error fetching profile:', error);
+          console.error('❌ Error fetching profile:', error);
           setStatus('error');
           setMessage('Error verifying subscription status.');
           return;
         }
 
+        console.log('📋 Profile data:', profile);
+
         if (profile?.is_subscribed) {
+          console.log('✅ Subscription is active!');
           setStatus('success');
           setMessage(`Your ${planName || ''} subscription is now active!`);
           
@@ -52,25 +60,28 @@ const PaymentSuccess = () => {
           
           if (attempts < maxAttempts) {
             setStatus('processing');
-            setMessage(`Processing your payment... (${attempts}/${maxAttempts})`);
+            setMessage(`Verifying your payment... (${attempts}/${maxAttempts})`);
+            console.log(`⏳ Not active yet. Retrying in 2 seconds...`);
             
             // Tentar novamente em 2 segundos
             setTimeout(checkSubscriptionStatus, 2000);
           } else {
             // Excedeu o número de tentativas
+            console.warn('⚠️ Max attempts reached');
             setStatus('error');
-            setMessage('Payment is taking longer than expected. Please check your email or contact support.');
+            setMessage('Payment verification is taking longer than expected. Your subscription may still be processing. Please check your email or contact support if you were charged.');
           }
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Unexpected error:', error);
         setStatus('error');
-        setMessage('An error occurred. Please contact support if you were charged.');
+        setMessage('An unexpected error occurred. Please contact support if you were charged.');
       }
     };
 
-    // Aguardar 2 segundos antes de começar a verificar
-    setTimeout(checkSubscriptionStatus, 2000);
+    // Aguardar 3 segundos antes de começar a verificar (dar tempo pro webhook)
+    console.log('⏰ Starting verification in 3 seconds...');
+    setTimeout(checkSubscriptionStatus, 3000);
   }, [planName, navigate]);
 
   return (
@@ -81,6 +92,7 @@ const PaymentSuccess = () => {
             <div className={styles.spinner}></div>
             <h2>Processing Payment</h2>
             <p>{message}</p>
+            <p className={styles.helpText}>Please wait while we confirm your payment with PayPal...</p>
           </>
         )}
 
@@ -89,6 +101,7 @@ const PaymentSuccess = () => {
             <div className={styles.spinner}></div>
             <h2>Almost There!</h2>
             <p>{message}</p>
+            <p className={styles.helpText}>This usually takes just a few seconds.</p>
           </>
         )}
 
@@ -104,14 +117,22 @@ const PaymentSuccess = () => {
         {status === 'error' && (
           <>
             <div className={styles.errorIcon}>✕</div>
-            <h2>Something Went Wrong</h2>
+            <h2>Verification Issue</h2>
             <p>{message}</p>
-            <button 
-              className={styles.button}
-              onClick={() => navigate('/pricing')}
-            >
-              Back to Pricing
-            </button>
+            <div className={styles.buttonGroup}>
+              <button 
+                className={styles.button}
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard
+              </button>
+              <button 
+                className={styles.secondaryButton}
+                onClick={() => navigate('/pricing')}
+              >
+                Back to Pricing
+              </button>
+            </div>
           </>
         )}
       </div>
