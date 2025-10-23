@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
+import { trackPurchase } from '../../utils/facebookPixel'; // ← IMPORTAR
 import styles from './PaymentSuccess.module.css';
+
+// Mapeamento dos valores dos planos
+const PLAN_VALUES = {
+  'Weekly': 7.99,
+  'Monthly': 19.99,
+  'Quarterly': 49.99
+};
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -9,10 +17,11 @@ const PaymentSuccess = () => {
   const [status, setStatus] = useState('checking');
   const [message, setMessage] = useState('Processing your subscription...');
   const planName = searchParams.get('plan');
+  const [pixelFired, setPixelFired] = useState(false); // ← Prevenir disparo duplicado
 
   useEffect(() => {
     let attempts = 0;
-    const maxAttempts = 15; // Aumentado para 30 segundos
+    const maxAttempts = 15;
 
     const checkSubscriptionStatus = async () => {
       try {
@@ -29,7 +38,6 @@ const PaymentSuccess = () => {
 
         console.log('✅ User found:', user.id);
 
-        // Verificar o status da assinatura
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('is_subscribed, paypal_subscription_id')
@@ -50,12 +58,24 @@ const PaymentSuccess = () => {
           setStatus('success');
           setMessage(`Your ${planName || ''} subscription is now active!`);
           
-          // Redirecionar para o dashboard após 3 segundos
+          // ===== DISPARA O PIXEL DE PURCHASE (apenas uma vez) =====
+          if (!pixelFired && planName && profile.paypal_subscription_id) {
+            const planValue = PLAN_VALUES[planName] || 0;
+            
+            trackPurchase({
+              planName: planName,
+              value: planValue,
+              currency: 'USD',
+              transactionId: profile.paypal_subscription_id
+            });
+            
+            setPixelFired(true); // Marca como disparado
+          }
+          
           setTimeout(() => {
             navigate('/dashboard');
           }, 3000);
         } else {
-          // Ainda não ativado, tentar novamente
           attempts++;
           
           if (attempts < maxAttempts) {
@@ -63,10 +83,8 @@ const PaymentSuccess = () => {
             setMessage(`Verifying your payment... (${attempts}/${maxAttempts})`);
             console.log(`⏳ Not active yet. Retrying in 2 seconds...`);
             
-            // Tentar novamente em 2 segundos
             setTimeout(checkSubscriptionStatus, 2000);
           } else {
-            // Excedeu o número de tentativas
             console.warn('⚠️ Max attempts reached');
             setStatus('error');
             setMessage('Payment verification is taking longer than expected. Your subscription may still be processing. Please check your email or contact support if you were charged.');
@@ -79,10 +97,9 @@ const PaymentSuccess = () => {
       }
     };
 
-    // Aguardar 3 segundos antes de começar a verificar (dar tempo pro webhook)
     console.log('⏰ Starting verification in 3 seconds...');
     setTimeout(checkSubscriptionStatus, 3000);
-  }, [planName, navigate]);
+  }, [planName, navigate, pixelFired]);
 
   return (
     <div className={styles.container}>

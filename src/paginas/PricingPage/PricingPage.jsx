@@ -4,6 +4,7 @@ import Navbar from '../../componentes/Navbar/Navbar';
 import Footer from '../../componentes/Footer/Footer';
 import PaymentRequiredModal from '../../componentes/PaymentRequiredModal/PaymentRequiredModal';
 import { useNavigation } from '../../context/NavigationContext';
+import { trackInitiateCheckout } from '../../utils/facebookPixel'; // ← IMPORTAR
 import styles from './PricingPage.module.css';
 import billingImage from '../../assets/billing.png';
 
@@ -23,7 +24,6 @@ const PricingPage = () => {
   const { isLoggedIn } = useNavigation();
   const navigate = useNavigate();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  // 1. O estado de controle do card ativo voltou, com 'quarterly' como padrão
   const [activeCard, setActiveCard] = useState('quarterly');
 
   const handleSelectPlan = (planName) => {
@@ -31,7 +31,16 @@ const PricingPage = () => {
       setIsPaymentModalOpen(true);
       return;
     }
+    
     const selectedPlan = plans[planName];
+    
+    // ===== DISPARA O PIXEL DE INITIATE CHECKOUT =====
+    trackInitiateCheckout({
+      planName: selectedPlan.name,
+      value: selectedPlan.price,
+      currency: 'USD'
+    });
+    
     navigate('/payment', { state: { plan: selectedPlan } });
   };
 
@@ -45,10 +54,9 @@ const PricingPage = () => {
             <p>Join Design Flix and get unlimited access to thousands of exclusive prints. Cancel anytime.</p>
           </header>
 
-          {/* 2. Eventos de rato para controlar o estado do card ativo */}
           <div 
             className={styles.pricingGrid}
-            onMouseLeave={() => setActiveCard('quarterly')} // Volta para o padrão ao sair
+            onMouseLeave={() => setActiveCard('quarterly')}
           >
             {/* Card 1: Weekly */}
             <div 
@@ -82,7 +90,6 @@ const PricingPage = () => {
                 <li><CheckIcon /> <span>Unrestricted downloads</span></li>
                 <li><CheckIcon /> <span>Best value for money</span></li>
               </ul>
-              {/* O botão primário ainda pode ser usado para indicar a recomendação de custo-benefício */}
               <button onClick={() => handleSelectPlan('Monthly')} className={`${styles.selectButton} ${styles.primaryButton}`}>
                 Select Plan
               </button>

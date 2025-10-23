@@ -1,14 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // ← IMPORTAR
 import Modal from '../Modal/Modal';
-import { useNavigation } from '../../context/NavigationContext';
 import styles from './LoginRequiredModal.module.css';
 
 const LoginRequiredModal = ({ isOpen, onClose }) => {
-  const { navigateTo } = useNavigation();
+  const navigate = useNavigate(); // ← ADICIONAR
 
   const handleGoToLogin = () => {
-    onClose();
-    navigateTo('login');
+    onClose(); // Fecha o modal
+    navigate('/login'); // ← NAVEGA PARA O LOGIN
   };
 
   return (

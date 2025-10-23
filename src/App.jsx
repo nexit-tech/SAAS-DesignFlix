@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
 import ScrollToTop from './componentes/ScrollToTop/ScrollToTop';
+
+// Facebook Pixel
+import { initFacebookPixel } from './utils/facebookPixel';
 
 // Páginas
 import HomePage from './paginas/HomePage/HomePage';
@@ -59,6 +62,11 @@ function App() {
   const { showOverlay } = useNavigation();
   const location = useLocation();
 
+  // ===== INICIALIZA O FACEBOOK PIXEL UMA VEZ =====
+  useEffect(() => {
+    initFacebookPixel();
+  }, []); // Roda apenas uma vez quando o App monta
+
   return (
     <div className="app-container">
       {showOverlay && <div className="app-overlay"></div>}
@@ -78,7 +86,7 @@ function App() {
           <Route path="/payment" element={<PageWrapper><PaymentPage /></PageWrapper>} />
           <Route path="/reset-password" element={<PageWrapper><ResetPasswordPage /></PageWrapper>} />
           
-          {/* ROTA DE SUCESSO SEM ANIMAÇÃO PARA TESTAR */}
+          {/* ROTA DE SUCESSO SEM ANIMAÇÃO */}
           <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
       </AnimatePresence>
